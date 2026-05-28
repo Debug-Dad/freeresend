@@ -37,6 +37,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.75,
     },
     {
+      url: `${baseUrl}/tools/ses-production-request-helper`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.74,
+    },
+    {
       url: `${baseUrl}/guides/ses-production-readiness`,
       lastModified: now,
       changeFrequency: "monthly",

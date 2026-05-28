@@ -15,11 +15,12 @@ import {
   Copy,
   CheckCircle,
   MailCheck,
+  FileText,
 } from "lucide-react";
 import EnvelopeIcon from "./EnvelopeIcon";
 import DeploymentReviewCta from "./DeploymentReviewCta";
 import LaunchKitCta from "./LaunchKitCta";
-import { deploymentReview, launchKit, sesProductionGuide } from "@/config/launch-kit";
+import { deploymentReview, launchKit, sesProductionGuide, sesRequestHelper } from "@/config/launch-kit";
 
 export default function LandingPage() {
   const [copiedCode, setCopiedCode] = useState(false);
@@ -73,6 +74,12 @@ export default function LandingPage() {
                 className="hidden text-gray-600 transition-colors hover:text-gray-900 lg:inline"
               >
                 DNS Check
+              </Link>
+              <Link
+                href={sesRequestHelper.productUrl}
+                className="hidden text-gray-600 transition-colors hover:text-gray-900 xl:inline"
+              >
+                SES Request
               </Link>
               <Link
                 href={deploymentReview.productUrl}
@@ -160,6 +167,13 @@ export default function LandingPage() {
               <MailCheck className="h-5 w-5" />
               <span>DNS Check</span>
             </Link>
+            <Link
+              href={sesRequestHelper.productUrl}
+              className="border-2 border-gray-200 bg-white text-gray-700 px-8 py-4 rounded-lg hover:border-gray-300 transition-colors flex items-center justify-center space-x-2 font-semibold"
+            >
+              <FileText className="h-5 w-5" />
+              <span>SES Request</span>
+            </Link>
           </div>
           
           <div className="text-center mb-8">
@@ -226,6 +240,26 @@ export default function LandingPage() {
               >
                 <BookOpenCheck className="h-5 w-5" />
                 <span>Read guide</span>
+              </Link>
+            </div>
+          </div>
+
+          <div className="mx-auto mb-12 max-w-4xl rounded-lg border border-indigo-100 bg-white p-6 text-left shadow-sm">
+            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div>
+                <p className="text-sm font-medium uppercase tracking-wide text-indigo-700">SES access request</p>
+                <h3 className="mt-2 text-2xl font-bold text-gray-900">Draft the production request without secrets.</h3>
+                <p className="mt-3 text-gray-600">
+                  Turn public domain, volume, opt-in, bounce, and complaint details into an AWS reviewer-friendly SES
+                  production access request.
+                </p>
+              </div>
+              <Link
+                href={sesRequestHelper.productUrl}
+                className="inline-flex items-center justify-center space-x-2 rounded-lg bg-indigo-600 px-5 py-3 font-semibold text-white transition-colors hover:bg-indigo-700"
+              >
+                <FileText className="h-5 w-5" />
+                <span>Draft request</span>
               </Link>
             </div>
           </div>
@@ -586,6 +620,14 @@ export default function LandingPage() {
                     className="text-gray-400 hover:text-white transition-colors"
                   >
                     DNS Readiness Checker
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href={sesRequestHelper.productUrl}
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    SES Request Helper
                   </Link>
                 </li>
                 <li>
