@@ -37,3 +37,9 @@ export const sesProductionGuide = {
   productUrl: "/guides/ses-production-readiness",
   canonicalUrl: "https://www.freeresend.com/guides/ses-production-readiness",
 } as const;
+
+export const sesRequestHelper = {
+  name: "SES Production Request Helper",
+  productUrl: "/tools/ses-production-request-helper",
+  canonicalUrl: "https://www.freeresend.com/tools/ses-production-request-helper",
+} as const;

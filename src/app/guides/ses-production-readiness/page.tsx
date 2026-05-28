@@ -12,7 +12,7 @@ import {
   Siren,
   Workflow,
 } from "lucide-react";
-import { deploymentReview, launchKit, sesProductionGuide } from "@/config/launch-kit";
+import { deploymentReview, launchKit, sesProductionGuide, sesRequestHelper } from "@/config/launch-kit";
 
 export const metadata: Metadata = {
   title: "FreeResend SES Production Readiness Guide",
@@ -83,6 +83,9 @@ export default function SesProductionReadinessPage() {
             <Link href="/tools/email-dns-checker" className="text-gray-600 hover:text-gray-900">
               DNS checker
             </Link>
+            <Link href={sesRequestHelper.productUrl} className="text-gray-600 hover:text-gray-900">
+              SES request
+            </Link>
             <Link href={deploymentReview.productUrl} className="text-gray-600 hover:text-gray-900">
               Review
             </Link>
@@ -109,6 +112,13 @@ export default function SesProductionReadinessPage() {
               >
                 <MailCheck className="h-4 w-4" />
                 <span>Run DNS checker</span>
+              </Link>
+              <Link
+                href={sesRequestHelper.productUrl}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-700 transition-colors hover:border-gray-300"
+              >
+                <ClipboardCheck className="h-4 w-4" />
+                <span>Draft SES request</span>
               </Link>
               <a
                 href={deploymentReview.checkoutUrl}
