@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import LaunchKitPrintButton from "@/components/LaunchKitPrintButton";
 import { launchKit } from "@/config/launch-kit";
@@ -56,7 +57,18 @@ const groups = [
   },
 ];
 
-export default function LaunchKitDownloadPage() {
+export default async function LaunchKitDownloadPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const purchase = typeof params.purchase === "string" ? params.purchase : undefined;
+
+  if (purchase !== "success") {
+    redirect(launchKit.productUrl);
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-10 text-gray-900 print:bg-white print:px-0 print:py-0">
       <article className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm print:rounded-none print:p-0 print:shadow-none">
