@@ -76,19 +76,19 @@ export default function LaunchKitPage() {
                 <ExternalLink className="h-4 w-4" />
               </a>
               <Link
-                href="/launch-kit/download"
+                href="#included-checklist"
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-700 transition-colors hover:border-gray-300"
               >
-                <span>Preview checklist</span>
+                <span>See what is included</span>
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
             <p className="mt-4 text-sm text-gray-500">
-              Stripe checkout redirects to the printable kit. You can also preview it before buying.
+              Stripe checkout redirects to the printable kit after purchase.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div id="included-checklist" className="scroll-mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="border-b border-gray-100 pb-4">
               <p className="text-sm font-medium uppercase tracking-wide text-blue-700">Included checklist</p>
               <h2 className="mt-2 text-2xl font-bold text-gray-900">{launchKit.name}</h2>
