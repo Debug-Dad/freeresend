@@ -164,7 +164,7 @@ export default function ApiKeysTab() {
                   onChange={(e) =>
                     setNewKey({ ...newKey, domainId: e.target.value })
                   }
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                   required
                 >
                   <option value="">Select a domain</option>
@@ -191,7 +191,7 @@ export default function ApiKeysTab() {
                     setNewKey({ ...newKey, keyName: e.target.value })
                   }
                   placeholder="e.g., Production Key, Development Key"
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                   required
                 />
               </div>

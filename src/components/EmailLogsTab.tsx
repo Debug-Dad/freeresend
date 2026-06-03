@@ -144,7 +144,7 @@ export default function EmailLogsTab() {
                 onChange={(e) =>
                   setFilters({ ...filters, domain_id: e.target.value, page: 1 })
                 }
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
               >
                 <option value="">All domains</option>
                 {domains.map((domain) => (
@@ -168,7 +168,7 @@ export default function EmailLogsTab() {
                 onChange={(e) =>
                   setFilters({ ...filters, status: e.target.value, page: 1 })
                 }
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
               >
                 <option value="">All statuses</option>
                 <option value="sent">Sent</option>
@@ -196,7 +196,7 @@ export default function EmailLogsTab() {
                     page: 1,
                   })
                 }
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
               >
                 <option value="25">25</option>
                 <option value="50">50</option>
