@@ -11,12 +11,19 @@ export async function middleware(req: NextRequest) {
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   if (isPublic) return NextResponse.next();
 
+  // DEBUG: log all cookie names received
+  const cookieNames = req.cookies.getAll().map((c) => c.name);
+  console.log("[freeresend-auth] cookies received:", JSON.stringify(cookieNames));
+  console.log("[freeresend-auth] NEXTAUTH_SECRET set:", !!process.env.NEXTAUTH_SECRET);
+
   const token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET!,
     cookieName: "__Secure-next-auth.session-token",
     secureCookie: true,
-  });
+  }).catch((e) => { console.log("[freeresend-auth] getToken error:", e?.message); return null; });
+
+  console.log("[freeresend-auth] token result:", token ? `ok (email: ${token.email})` : "null");
 
   if (!token) {
     if (pathname.startsWith("/api/")) {
