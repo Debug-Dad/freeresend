@@ -1,25 +1,35 @@
 import { Pool, PoolClient } from "pg";
 
 // PostgreSQL connection pool
-// PG_PASSWORD can be set separately to avoid URL-encoding issues with special characters
-const poolConfig = process.env.PG_PASSWORD
-  ? {
-      connectionString: process.env.DATABASE_URL,
-      password: process.env.PG_PASSWORD,
-      ssl: { rejectUnauthorized: false },
-      max: 5,
-      idleTimeoutMillis: 10000,
-      connectionTimeoutMillis: 5000,
-    }
-  : {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
-      max: 5,
-      idleTimeoutMillis: 10000,
-      connectionTimeoutMillis: 5000,
-    };
+// PG_PASSWORD can be set separately to avoid URL-encoding issues with special characters in DATABASE_URL
+function buildPoolConfig() {
+  const dbUrl = process.env.DATABASE_URL!;
+  const pgPassword = process.env.PG_PASSWORD;
 
-const pool = new Pool(poolConfig);
+  const common = {
+    ssl: { rejectUnauthorized: false },
+    max: 5,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 5000,
+  };
+
+  if (pgPassword) {
+    // Parse the URL and use individual params so pg never tries to decode the password from a URL
+    const url = new URL(dbUrl);
+    return {
+      host: url.hostname,
+      port: parseInt(url.port) || 5432,
+      user: url.username,
+      password: pgPassword,
+      database: url.pathname.replace(/^\//, ""),
+      ...common,
+    };
+  }
+
+  return { connectionString: dbUrl, ...common };
+}
+
+const pool = new Pool(buildPoolConfig());
 
 // Export the pool for direct access if needed
 export { pool as db };
