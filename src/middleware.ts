@@ -17,30 +17,35 @@ export async function middleware(req: NextRequest) {
   // JWE = 5 parts, JWT = 3 parts
   const tokenFormat = dotParts === 5 ? "JWE (encrypted)" : dotParts === 3 ? "JWT (signed)" : `unknown (${dotParts} parts)`;
 
+  const secretPrefix = process.env.NEXTAUTH_SECRET?.substring(0, 8) ?? "(not set)";
+  const secretLen = process.env.NEXTAUTH_SECRET?.length ?? 0;
+
+  const errors: string[] = [];
+
   // Try 1: standard getToken with NextRequest
   let token = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET!,
     cookieName: "__Secure-next-auth.session-token",
     secureCookie: true,
-  }).catch(() => null);
+  }).catch((e) => { errors.push(`try1: ${e?.message ?? String(e)}`); return null; });
 
-  // Try 2: pass cookies as plain object (bypasses NextRequest cookie API differences)
+  // Try 2: pass cookies as plain object
   if (!token && rawSessionCookie) {
     token = await getToken({
       req: { cookies: Object.fromEntries(req.cookies.getAll().map((c) => [c.name, c.value])) } as never,
       secret: process.env.NEXTAUTH_SECRET!,
       cookieName: "__Secure-next-auth.session-token",
       secureCookie: false,
-    }).catch(() => null);
+    }).catch((e) => { errors.push(`try2: ${e?.message ?? String(e)}`); return null; });
   }
 
-  // Try 3: no cookieName — let getToken auto-detect
+  // Try 3: no cookieName
   if (!token && rawSessionCookie) {
     token = await getToken({
       req,
       secret: process.env.NEXTAUTH_SECRET!,
-    }).catch(() => null);
+    }).catch((e) => { errors.push(`try3: ${e?.message ?? String(e)}`); return null; });
   }
 
   if (!token) {
@@ -51,10 +56,10 @@ export async function middleware(req: NextRequest) {
       `<!DOCTYPE html><html><body style="font-family:monospace;padding:40px;max-width:700px;margin:0 auto;line-height:1.6">
         <h2 style="color:#ef4444">Access Denied — Debug Info</h2>
         <p><strong>Cookies received:</strong> ${cookieNames.join(", ") || "(none)"}</p>
-        <p><strong>NEXTAUTH_SECRET set:</strong> ${!!process.env.NEXTAUTH_SECRET}</p>
+        <p><strong>NEXTAUTH_SECRET prefix:</strong> ${secretPrefix} (length: ${secretLen})</p>
         <p><strong>Token format:</strong> ${tokenFormat}</p>
-        <p><strong>Raw token prefix:</strong> ${rawSessionCookie.substring(0, 30)}...</p>
-        <p><strong>All 3 getToken attempts:</strong> null</p>
+        <p><strong>Raw token prefix:</strong> ${rawSessionCookie.substring(0, 40)}...</p>
+        <p><strong>Errors:</strong> ${errors.length ? errors.join(" | ") : "(no errors thrown — returned null silently)"}</p>
       </body></html>`,
       { status: 401, headers: { "Content-Type": "text/html" } }
     );
