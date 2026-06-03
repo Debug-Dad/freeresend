@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJWT } from "@/lib/auth";
 import { getDomainById, deleteDomain } from "@/lib/domains";
+import { query } from "@/lib/database";
 
 function cors(response: NextResponse) {
   response.headers.set("Access-Control-Allow-Origin", "*");
@@ -19,28 +19,16 @@ export async function GET(
   }
 
   try {
-    // Check authorization
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
+    const userId = adminResult.rows[0].id;
 
     const { id } = await params;
     const domain = await getDomainById(id);
 
-    if (!domain || domain.user_id !== user.id) {
+    if (!domain || domain.user_id !== userId) {
       return cors(NextResponse.json({ error: "Domain not found" }, { status: 404 }));
     }
 
@@ -67,26 +55,14 @@ export async function DELETE(
   }
 
   try {
-    // Check authorization
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
+    const userId = adminResult.rows[0].id;
 
     const { id } = await params;
-    await deleteDomain(id, user.id);
+    await deleteDomain(id, userId);
 
     return cors(NextResponse.json({
       success: true,

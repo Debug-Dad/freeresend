@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/database";
 import { createSmtpCredentials, deleteSmtpCredentials } from "@/lib/smtp";
-import { verifyJWT } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -23,28 +22,16 @@ export async function POST(
   try {
     const { id } = await params;
 
-    // Check authorization
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
+    const userId = adminResult.rows[0].id;
 
     // Get domain details
     const domainResult = await query(
       "SELECT * FROM domains WHERE id = $1 AND user_id = $2",
-      [id, user.id]
+      [id, userId]
     );
 
     if (domainResult.rows.length === 0) {
@@ -111,28 +98,16 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Check authorization
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
+    const userId = adminResult.rows[0].id;
 
     // Get domain details
     const domainResult = await query(
       "SELECT * FROM domains WHERE id = $1 AND user_id = $2",
-      [id, user.id]
+      [id, userId]
     );
 
     if (domainResult.rows.length === 0) {

@@ -2,28 +2,6 @@ const API_BASE =
   process.env.NODE_ENV === "development" ? "http://localhost:3000/api" : "/api";
 
 class ApiClient {
-  private token: string | null = null;
-
-  constructor() {
-    if (typeof window !== "undefined") {
-      this.token = localStorage.getItem("auth_token");
-    }
-  }
-
-  setToken(token: string) {
-    this.token = token;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("auth_token", token);
-    }
-  }
-
-  clearToken() {
-    this.token = null;
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("auth_token");
-    }
-  }
-
   private async request(endpoint: string, options: RequestInit = {}) {
     const url = `${API_BASE}${endpoint}`;
 
@@ -31,10 +9,6 @@ class ApiClient {
       "Content-Type": "application/json",
       ...(options.headers as Record<string, string>),
     };
-
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
-    }
 
     const response = await fetch(url, {
       ...options,
@@ -49,24 +23,6 @@ class ApiClient {
     }
 
     return response.json();
-  }
-
-  // Auth
-  async login(email: string, password: string) {
-    const response = await this.request("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (response.data?.token) {
-      this.setToken(response.data.token);
-    }
-
-    return response;
-  }
-
-  async getUser() {
-    return this.request("/auth/me");
   }
 
   // Domains

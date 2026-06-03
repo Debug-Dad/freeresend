@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJWT } from "@/lib/auth";
 import { verifyApiKey } from "@/lib/api-keys";
 import { query } from "@/lib/database";
 
@@ -27,7 +26,7 @@ function cors(response: NextResponse) {
   return response;
 }
 
-// Support both user authentication (dashboard) and API key authentication
+// Support both API key authentication and admin session (middleware-gated)
 export async function GET(request: NextRequest) {
   // Handle CORS preflight
   if (request.method === "OPTIONS") {
@@ -36,13 +35,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const authHeader = request.headers.get("authorization");
-    
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing authorization header" },
-        { status: 401 }
-      ));
-    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -53,7 +45,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     let domainIds: string[] = [];
 
-    if (authHeader.startsWith("Bearer frs_")) {
+    if (authHeader?.startsWith("Bearer frs_")) {
       // API key authentication
       const apiKey = await verifyApiKey(authHeader.substring(7));
       if (!apiKey) {
@@ -64,19 +56,17 @@ export async function GET(request: NextRequest) {
       }
       domainIds = [apiKey.domain_id];
     } else {
-      // User JWT authentication
-      const user = verifyJWT(authHeader.substring(7));
-      if (!user) {
-        return cors(NextResponse.json(
-          { error: "Invalid or expired token" },
-          { status: 401 }
-        ));
+      // Admin session — middleware already validated the NextAuth cookie
+      const adminResult = await query("SELECT id FROM users LIMIT 1");
+      if (adminResult.rows.length === 0) {
+        return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
       }
-      
+      const userId = adminResult.rows[0].id;
+
       try {
         const result = await query(
           "SELECT id FROM domains WHERE user_id = $1",
-          [user.id]
+          [userId]
         );
         domainIds = result.rows.map((d) => d.id);
       } catch (domainsError: unknown) {
@@ -128,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     // Get email logs with JOINs
     const emailLogsResult = await query(
-      `SELECT 
+      `SELECT
         el.*,
         d.domain as domain_name,
         ak.key_name as api_key_name

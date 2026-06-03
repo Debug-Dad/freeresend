@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { verifyJWT } from "@/lib/auth";
 import { addDomain, getUserDomains } from "@/lib/domains";
+import { query } from "@/lib/database";
 
 const addDomainSchema = z.object({
   domain: z.string().min(1, "Domain is required"),
@@ -21,25 +21,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Check authorization
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
+    const userId = adminResult.rows[0].id;
 
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
-
-    const domains = await getUserDomains(user.id);
+    const domains = await getUserDomains(userId);
 
     return cors(NextResponse.json({
       success: true,
@@ -61,30 +49,18 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Check authorization
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
+    const userId = adminResult.rows[0].id;
 
     // Parse and validate request
     const body = await request.json();
     const validatedData = addDomainSchema.parse(body);
     const { domain } = validatedData;
 
-    const result = await addDomain(user.id, domain);
+    const result = await addDomain(userId, domain);
 
     return cors(NextResponse.json({
       success: true,

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import DomainsTab from "./DomainsTab";
 import ApiKeysTab from "./ApiKeysTab";
 import EmailLogsTab from "./EmailLogsTab";
@@ -9,7 +8,6 @@ import EmailLogsTab from "./EmailLogsTab";
 type Tab = "domains" | "apikeys" | "logs";
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("domains");
 
   const tabs = [
@@ -43,13 +41,8 @@ export default function Dashboard() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {user?.email}</span>
-              <button
-                onClick={logout}
-                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
-              >
-                Sign out
-              </button>
+              <span className="text-gray-700">Welcome, admin@debugdad.com</span>
+              <a href="https://admin.debugdad.com" className="text-gray-500 hover:text-gray-700 text-sm font-medium">Admin App ↗</a>
             </div>
           </div>
         </div>

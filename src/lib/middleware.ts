@@ -4,45 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 type RouteContext<T = Record<string, string>> = {
   params: Promise<T>;
 };
-import { verifyJWT } from "./auth";
 import { verifyApiKey } from "./api-keys";
-import type { AuthUser } from "./auth";
 import type { ApiKey } from "./database";
 import { z } from "zod";
 
 export interface AuthenticatedRequest extends NextRequest {
-  user?: AuthUser;
   apiKey?: ApiKey;
-}
-
-export function withAuth<T = Record<string, string>>(
-  handler: (req: AuthenticatedRequest, context?: RouteContext<T>) => Promise<NextResponse>
-) {
-  return async (req: NextRequest, context?: RouteContext<T>) => {
-    const authHeader = req.headers.get("authorization");
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      );
-    }
-
-    const authenticatedReq = req as AuthenticatedRequest;
-    authenticatedReq.user = user;
-
-    return handler(authenticatedReq, context);
-  };
 }
 
 export function withApiKey<T = Record<string, string>>(

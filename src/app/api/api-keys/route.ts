@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { verifyJWT } from "@/lib/auth";
 import { generateApiKey, getUserApiKeys } from "@/lib/api-keys";
 import { getDomainById } from "@/lib/domains";
+import { query } from "@/lib/database";
 
 const createApiKeySchema = z.object({
   domainId: z.string().uuid("Invalid domain ID"),
@@ -24,25 +24,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Check authorization
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
+    const userId = adminResult.rows[0].id;
 
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
-
-    const apiKeys = await getUserApiKeys(user.id);
+    const apiKeys = await getUserApiKeys(userId);
 
     return cors(NextResponse.json({
       success: true,
@@ -64,23 +52,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Check authorization
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return cors(NextResponse.json(
-        { error: "Missing or invalid authorization header" },
-        { status: 401 }
-      ));
+    const adminResult = await query("SELECT id FROM users LIMIT 1");
+    if (adminResult.rows.length === 0) {
+      return cors(NextResponse.json({ error: "No admin user configured" }, { status: 500 }));
     }
-
-    const token = authHeader.substring(7);
-    const user = verifyJWT(token);
-    if (!user) {
-      return cors(NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
-      ));
-    }
+    const userId = adminResult.rows[0].id;
 
     // Parse and validate request
     const body = await request.json();
@@ -89,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // Verify domain belongs to user
     const domain = await getDomainById(domainId);
-    if (!domain || domain.user_id !== user.id) {
+    if (!domain || domain.user_id !== userId) {
       return cors(NextResponse.json(
         { error: "Domain not found or unauthorized" },
         { status: 404 }
@@ -105,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = await generateApiKey(
-      user.id,
+      userId,
       domainId,
       keyName,
       permissions
