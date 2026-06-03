@@ -226,7 +226,7 @@ export default function DomainsTab() {
                 placeholder="example.com"
                 value={newDomain}
                 onChange={(e) => setNewDomain(e.target.value)}
-                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 placeholder-gray-400"
                 disabled={addingDomain}
               />
             </div>
