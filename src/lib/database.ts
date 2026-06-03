@@ -1,16 +1,25 @@
 import { Pool, PoolClient } from "pg";
 
 // PostgreSQL connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-    ca: undefined,
-  },
-  max: 5, // Maximum number of clients in the pool (reduced from 20)
-  idleTimeoutMillis: 10000, // Close idle clients after 10 seconds (reduced from 30s)
-  connectionTimeoutMillis: 5000, // Return an error after 5 seconds if connection could not be established
-});
+// PG_PASSWORD can be set separately to avoid URL-encoding issues with special characters
+const poolConfig = process.env.PG_PASSWORD
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      password: process.env.PG_PASSWORD,
+      ssl: { rejectUnauthorized: false },
+      max: 5,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 5000,
+    }
+  : {
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 5,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 5000,
+    };
+
+const pool = new Pool(poolConfig);
 
 // Export the pool for direct access if needed
 export { pool as db };
